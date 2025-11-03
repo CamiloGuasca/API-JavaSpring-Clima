@@ -1,0 +1,13 @@
+package com.taller2.taller2.modelo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
+
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DescClima {
+
+    @JsonProperty("description")
+    private String descripcion;
+}
