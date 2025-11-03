@@ -6,13 +6,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-//import java.time.Instant;
-//import java.time.LocalDateTime;
-//import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-//import java.util.stream.Collector;
 import java.util.stream.Collectors;
-//import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ServicioClima {
@@ -52,6 +51,12 @@ public class ServicioClima {
 
         long ulthoract = prox24h.get(0).getDt();
 
+        Instant instant = Instant.ofEpochSecond(ulthoract);
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of("Z"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String horaFormateada = localDateTime.format(formatter);
+
+
         List<Pronostico> prox3dias = todRes.stream().limit(24).collect(Collectors.toList());
 
         double temMin3D = prox3dias.stream()
@@ -63,7 +68,18 @@ public class ServicioClima {
             .mapToDouble(item -> item.getDatos().getTemperatura())
             .max()
             .orElse(Double.NaN);
-
+        
+        
+        double temMin5D = todRes.stream()
+            .mapToDouble(item -> item.getDatos().getTemperatura())
+            .min()
+            .orElse(Double.NaN);
+        
+        double temMax5D = todRes.stream()
+            .mapToDouble(item -> item.getDatos().getTemperatura())
+            .max()
+            .orElse(Double.NaN);
+            
 
             return String.format(
             "=========================================\n" +
@@ -75,14 +91,19 @@ public class ServicioClima {
             "Hora del pronóstico (Referencia): %s\n\n" +
             "--- Resumen Próximos 3 días ---\n" +
             "Mínima esperada: %.2f °C\n" +
-            "Máxima esperada: %.2f °C\n" +
+            "Máxima esperada: %.2f °C\n\n" + 
+            "--- Resumen Próximos 5 días (Global) ---\n" + 
+            "Mínima esperada: %.2f °C\n" +                 
+            "Máxima esperada: %.2f °C\n" +                 
             "=========================================",
             ciudad, 
             promtem24h, 
             descripEsp, 
-            ulthoract,
+            horaFormateada,
             temMin3D, 
-            temMax3D
+            temMax3D,
+            temMin5D, 
+            temMax5D  
         );
     }
 }
